@@ -1,20 +1,60 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🎮 Bitarr
 
-# Run and deploy your AI Studio app
+Bitarr is a comprehensive game management and automation tool inspired by the 'arr' family (Sonarr/Radarr). It simplifies the process of managing large game libraries across multiple platforms, from PC to retro consoles.
 
-This contains everything you need to run your app locally.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.4--stable-emerald)
+![Docker](https://img.shields.io/badge/docker-ready-indigo)
 
-View your app in AI Studio: https://ai.studio/apps/drive/1AgDI0VczfNtx91XilO7f3FdmNNg72s1i
+## ✨ Features
 
-## Run Locally
+- **Multi-Platform Support**: Per-platform and per-game path mapping for PS1, PS2, PS3, Switch, Wii, GameCube, and PC.
+- **Metadata Scraping**: Direct integration with **IGDB** for high-quality covers, descriptions, and ratings.
+- **Library Scanning**: Import existing local libraries with automated filename matching.
+- **Indexer Integration**: Support for **Myrient** (ROMs), **Prowlarr** (Torznab), and **NZBGeek** (Newznab).
+- **Download Automation**: Native support for **qBittorrent** and **SABnzbd**.
+- **Modern UI**: Clean, responsive dashboard with real-time download tracking and library statistics.
 
-**Prerequisites:**  Node.js
+## 🚀 Deployment
 
+Bitarr is designed to be hosted in a Docker container.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Using Portainer (Recommended)
+
+1. Open **Portainer** and go to **Stacks** > **Add stack**.
+2. Name it `bitarr`.
+3. Paste the following YAML into the Web editor:
+
+```yaml
+version: '3.8'
+
+services:
+  bitarr:
+    image: ghcr.io/yourusername/bitarr:latest
+    container_name: bitarr
+    ports:
+      - "5054:80"
+    volumes:
+      - /path/to/your/games:/mnt/games
+      - bitarr_config:/config
+    restart: unless-stopped
+
+volumes:
+  bitarr_config:
+```
+
+## ⚙️ Configuration
+
+1. **Metadata**: Go to Settings > Metadata and enter your Twitch Client ID and Secret (from [dev.twitch.tv](https://dev.twitch.tv)).
+2. **Paths**: Go to Settings > Paths to map your mount points to specific console categories.
+3. **Downloaders**: Add your qBittorrent or SABnzbd credentials to enable automated fetching.
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 19, Tailwind CSS, Lucide Icons
+- **Build Tool**: Vite
+- **Metadata**: IGDB API (via Twitch OAuth)
+- **Server**: Nginx (Alpine)
+
+---
+*Disclaimer: Bitarr is a library management tool. Please ensure you own the content you are managing.*

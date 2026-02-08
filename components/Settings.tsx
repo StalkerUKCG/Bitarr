@@ -20,7 +20,6 @@ const Settings: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto flex gap-8 h-full">
-      {/* Settings Nav */}
       <aside className="w-48 space-y-1">
         <SettingsNavItem 
           active={activeSection === 'general'} 
@@ -54,7 +53,6 @@ const Settings: React.FC = () => {
         />
       </aside>
 
-      {/* Settings Content */}
       <div className="flex-1 space-y-8 animate-in slide-in-from-right-4 duration-500">
         {activeSection === 'paths' && <PathSettings />}
         {activeSection === 'indexers' && <IndexerSettings />}
@@ -98,29 +96,20 @@ const MetadataSettings: React.FC = () => (
 
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-400 uppercase">Client ID</label>
+          <label className="text-xs font-bold text-slate-400 uppercase">Twitch Client ID</label>
           <input 
             type="password" 
-            placeholder="Enter IGDB Client ID"
+            placeholder="Enter Client ID"
             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm font-mono outline-none focus:ring-1 ring-indigo-500"
           />
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs font-bold text-slate-400 uppercase">Client Secret</label>
+          <label className="text-xs font-bold text-slate-400 uppercase">Twitch Client Secret</label>
           <input 
             type="password" 
-            placeholder="Enter IGDB Client Secret"
+            placeholder="Enter Client Secret"
             className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm font-mono outline-none focus:ring-1 ring-indigo-500"
           />
-        </div>
-      </div>
-
-      <div className="pt-4 flex items-center gap-4">
-        <div className="flex-1 p-3 bg-slate-950 rounded-lg border border-slate-800 flex items-center gap-3">
-          <Shield className="text-emerald-500" size={18} />
-          <div className="text-[10px] text-slate-500">
-            AI-Enhanced Matching is currently <strong>Enabled</strong>. Bitarr uses Gemini to map messy folders to IGDB IDs automatically.
-          </div>
         </div>
       </div>
     </div>
@@ -141,25 +130,28 @@ const PathSettings: React.FC = () => (
     </div>
     
     <div className="space-y-3">
-      {Object.values(Platform).map((p, i) => (
-        <div key={p} className="flex items-center gap-4 bg-slate-900/50 border border-slate-800 p-4 rounded-xl group hover:border-slate-700">
-           <div className="w-32 font-bold text-sm text-slate-400">{p}</div>
-           <div className="flex-1">
+      {Object.values(Platform).map((p) => (
+        <div key={p} className="bg-slate-900/50 border border-slate-800 p-4 rounded-xl space-y-3">
+           <div className="flex items-center justify-between">
+              <div className="font-bold text-sm text-indigo-400">{p} Base Path</div>
+              <span className="text-[10px] text-slate-600 font-mono italic">Applies to all games in this category</span>
+           </div>
+           <div className="flex gap-2">
              <input 
                type="text" 
-               defaultValue={p === Platform.PC ? `/mnt/games/pc` : `/mnt/games/roms/${p.toLowerCase().replace(' ', '')}`}
-               className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm font-mono text-indigo-400 outline-none focus:ring-1 ring-indigo-500"
+               placeholder={`/mnt/games/${p.toLowerCase().replace(' ', '')}`}
+               className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-sm font-mono outline-none focus:ring-1 ring-indigo-500"
              />
            </div>
-           <button className="opacity-0 group-hover:opacity-100 p-2 text-slate-500 hover:text-rose-400 transition-opacity">
-              <Trash2 size={16} />
-           </button>
+           <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-800/50">
+             <input type="checkbox" className="rounded bg-slate-950 border-slate-800" />
+             <label className="text-xs text-slate-500 font-medium uppercase tracking-wider">Allow per-game override path</label>
+           </div>
         </div>
       ))}
     </div>
 
     <div className="pt-4 border-t border-slate-800 flex justify-end gap-3">
-       <button className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-medium">Reset Defaults</button>
        <button className="bg-indigo-600 hover:bg-indigo-500 px-6 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
          <Save size={18} /> Save Mappings
        </button>
@@ -181,7 +173,7 @@ const IndexerSettings: React.FC = () => (
 
     <div className="grid grid-cols-1 gap-4">
       <IndexerCard name="Myrient" type="Direct Download (ROMs)" url="https://myrient.erista.me" enabled />
-      <IndexerCard name="Prowlarr (Torznab)" type="Aggregator" url="http://192.168.1.10:9696" enabled />
+      <IndexerCard name="Prowlarr (Torznab)" type="Aggregator" url="http://prowlarr:9696" enabled />
       <IndexerCard name="NZBGeek (Newznab)" type="Usenet" url="https://api.nzbgeek.info" enabled />
     </div>
   </div>
@@ -200,9 +192,6 @@ const IndexerCard: React.FC<{ name: string, type: string, url: string, enabled: 
        </div>
     </div>
     <div className="flex items-center gap-3">
-       <div className="w-10 h-5 bg-indigo-600 rounded-full relative cursor-pointer">
-          <div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div>
-       </div>
        <button className="p-2 text-slate-500 hover:text-slate-300">
          <SettingsIcon size={18} />
        </button>
@@ -243,18 +232,11 @@ const ClientCard: React.FC<{ name: string, type: string, host: string, port: num
       </span>
     </div>
     <div className="space-y-2 text-sm">
-      <div className="flex justify-between">
-        <span className="text-slate-500">Host</span>
-        <span className="font-mono text-slate-300">{host}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-slate-500">Port</span>
-        <span className="font-mono text-slate-300">{port}</span>
-      </div>
+      <div className="flex justify-between text-slate-500">Host: <span className="font-mono text-slate-300">{host}</span></div>
+      <div className="flex justify-between text-slate-500">Port: <span className="font-mono text-slate-300">{port}</span></div>
     </div>
     <div className="pt-2 flex gap-2">
        <button className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-lg text-xs font-bold">Test Connection</button>
-       <button className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg"><SettingsIcon size={16} /></button>
     </div>
   </div>
 );
@@ -267,16 +249,16 @@ const GeneralSettings: React.FC = () => (
           <div className="p-4 bg-slate-950 rounded-lg border border-slate-800">
              <div className="flex items-center gap-2 text-emerald-400 mb-2">
                 <CheckCircle2 size={18} />
-                <span className="text-sm font-bold">IGDB Connector</span>
+                <span className="text-sm font-bold">Metadata Sync</span>
              </div>
-             <p className="text-xs text-slate-500">Successfully authenticated and responsive.</p>
+             <p className="text-xs text-slate-500">IGDB API status is active and healthy.</p>
           </div>
           <div className="p-4 bg-slate-950 rounded-lg border border-slate-800">
              <div className="flex items-center gap-2 text-emerald-400 mb-2">
                 <CheckCircle2 size={18} />
-                <span className="text-sm font-bold">Root Folders</span>
+                <span className="text-sm font-bold">Filesystem</span>
              </div>
-             <p className="text-xs text-slate-500">All 7 paths are reachable and writable.</p>
+             <p className="text-xs text-slate-500">Path mappings are valid and writable.</p>
           </div>
        </div>
     </div>

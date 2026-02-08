@@ -1,8 +1,6 @@
-
 import React, { useState } from 'react';
 import { Search, Loader2, Plus, Download, FolderOpen, AlertTriangle } from 'lucide-react';
-import { searchGames, parseLocalFiles } from '../services/geminiService';
-import { Platform } from '../types';
+import { searchIGDB, matchLocalFiles } from '../services/igdbService';
 
 const AddGame: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -16,16 +14,19 @@ const AddGame: React.FC = () => {
     if (!query.trim()) return;
     
     setIsSearching(true);
-    const games = await searchGames(query);
-    setResults(games);
+    // In a real app, these would come from the Settings state
+    const clientId = localStorage.getItem('bitarr_igdb_client_id') || '';
+    const clientSecret = localStorage.getItem('bitarr_igdb_client_secret') || '';
+    
+    const games = await searchIGDB(query, clientId, clientSecret);
+    setResults(games as any[]);
     setIsSearching(false);
   };
 
   const handleImport = async () => {
-    // Simulating scanning a directory
     setIsSearching(true);
     const mockFiles = ["Mario_Odyssey.nsp", "Zelda_BOTW_Update.v1.2.zip", "FFVII_Disc1.bin", "Tekken3.iso"];
-    const parsed = await parseLocalFiles(mockFiles);
+    const parsed = await matchLocalFiles(mockFiles);
     setResults(parsed);
     setIsSearching(false);
   };
@@ -39,13 +40,13 @@ const AddGame: React.FC = () => {
             onClick={() => { setImportMode('search'); setResults([]); }}
             className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${importMode === 'search' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
           >
-            Search New Games
+            Search IGDB
           </button>
           <button 
             onClick={() => { setImportMode('import'); setResults([]); }}
             className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${importMode === 'import' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
           >
-            Import Existing Library
+            Import Local Files
           </button>
         </div>
       </div>
@@ -57,7 +58,7 @@ const AddGame: React.FC = () => {
             type="text" 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search game title from IGDB..." 
+            placeholder="Enter game title (e.g. Halo Infinite)..." 
             className="w-full bg-slate-900 border border-slate-800 rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 ring-indigo-500/50 text-lg shadow-2xl"
           />
           <button 
@@ -76,7 +77,7 @@ const AddGame: React.FC = () => {
                   type="text" 
                   value={localPath}
                   onChange={(e) => setLocalPath(e.target.value)}
-                  placeholder="/mnt/games/unprocessed..." 
+                  placeholder="/mnt/games/import..." 
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 pl-12 pr-4 outline-none focus:ring-2 ring-indigo-500/50"
                 />
              </div>
@@ -84,17 +85,17 @@ const AddGame: React.FC = () => {
                onClick={handleImport}
                className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-xl font-medium"
              >
-               Scan Folder
+               Scan Library
              </button>
           </div>
-          <p className="text-xs text-slate-500 text-center">We will use AI to match your folder names with IGDB metadata automatically.</p>
+          <p className="text-xs text-slate-500 text-center">Scan folders to automatically map existing game files to metadata.</p>
         </div>
       )}
 
       {isSearching && results.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-slate-500 animate-pulse">
           <Loader2 className="animate-spin mb-4" size={48} />
-          <p>Scraping metadata provider...</p>
+          <p>Querying metadata providers...</p>
         </div>
       )}
 
@@ -106,8 +107,8 @@ const AddGame: React.FC = () => {
                 <img src={game.coverUrl} className="w-32 h-44 object-cover rounded-xl shadow-lg group-hover:scale-105 transition-transform" alt="" />
                 <div className="flex-1 py-2">
                    <div className="flex justify-between items-start">
-                     <h3 className="text-xl font-bold">{game.title}</h3>
-                     <span className="text-xs font-mono bg-slate-800 text-slate-400 px-2 py-1 rounded">IGDB: {game.igdbId}</span>
+                     <h3 className="text-xl font-bold line-clamp-1">{game.title}</h3>
+                     <span className="text-[10px] font-mono bg-slate-800 text-slate-400 px-2 py-1 rounded">IGDB</span>
                    </div>
                    <p className="text-sm text-indigo-400 font-medium mb-2">{game.platform} • {game.releaseYear}</p>
                    <p className="text-xs text-slate-400 line-clamp-3 mb-4">{game.description}</p>
@@ -133,15 +134,11 @@ const AddGame: React.FC = () => {
                      <p className="text-xs text-slate-500 font-mono">{match.originalName}</p>
                      <div className="flex items-center gap-2">
                         <p className="font-bold text-lg text-emerald-400">{match.identifiedTitle}</p>
-                        <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded uppercase font-bold text-slate-500">{match.identifiedPlatform}</span>
+                        <span className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded uppercase font-bold text-slate-500">MATCH</span>
                      </div>
                    </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="text-right">
-                    <p className="text-[10px] uppercase font-bold text-slate-500">Confidence</p>
-                    <p className="text-sm font-bold">{Math.round((match.matchConfidence || 0.95) * 100)}%</p>
-                  </div>
                   <button className="p-2 bg-emerald-600/10 text-emerald-400 rounded-lg hover:bg-emerald-600/20 transition-colors">
                      <Plus size={20} />
                   </button>
@@ -156,7 +153,7 @@ const AddGame: React.FC = () => {
         <div className="flex flex-col items-center justify-center py-20 text-slate-600">
            <AlertTriangle size={48} className="mb-4 opacity-20" />
            <p className="text-lg">No results to display</p>
-           <p className="text-sm">Start by typing a game name above</p>
+           <p className="text-sm">Start by typing a game name or scanning a folder</p>
         </div>
       )}
     </div>

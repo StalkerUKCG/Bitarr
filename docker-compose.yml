@@ -1,4 +1,3 @@
-
 version: '3.8'
 
 services:
@@ -7,8 +6,9 @@ services:
     container_name: bitarr
     ports:
       - "5054:80"
-    environment:
-      - API_KEY=${API_KEY}
+    volumes:
+      - ./config:/config
+      - /path/to/your/games:/mnt/games
     restart: unless-stopped
     networks:
       - bitarr_network
