@@ -1,0 +1,18 @@
+
+version: '3.8'
+
+services:
+  bitarr:
+    build: .
+    container_name: bitarr
+    ports:
+      - "5054:80"
+    environment:
+      - API_KEY=${API_KEY}
+    restart: unless-stopped
+    networks:
+      - bitarr_network
+
+networks:
+  bitarr_network:
+    driver: bridge

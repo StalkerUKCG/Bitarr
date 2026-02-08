@@ -1,0 +1,6 @@
+
+{
+  "name": "Bitarr",
+  "description": "A comprehensive game management and automation tool inspired by the 'arr' family, featuring IGDB integration, path mapping, and multi-protocol download support.",
+  "requestFramePermissions": []
+}
